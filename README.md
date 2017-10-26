@@ -24,16 +24,17 @@ Before exporting the data, you need to add the following configuration settings 
 "host":"<<mysql host>>",
 "user":"<<mysql username>>",
 "password":"<<mysql password>>",
-"database":"<<mysql database of drupal>>
+"database":"<<mysql database of drupal>>,
+"data":"<<folder path for data to be exported>>"
 ```
 
 
 ## Assets & Images
 
-Your files and assets need to be available and accessible through the internet. For this purpose, you must define thedrupal_base_url, public and private file path in the config file so that the exporter will be able to create them.
+Your files and assets need to be available and accessible through the internet. For this purpose, you must define the drupal_base_url, public and private file path in the config file so that the exporter will be able to create them.
 
 ```bash
-drupal_base_url: http://example_hostname.com
+base_url: http://example_hostname.com
 public_path: <<public file path>>
 private_path: <<private file path>>
 ```

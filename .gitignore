@@ -2,11 +2,8 @@
 .idea/
 ./idea/*
 data/*
-module/*
 Query/*
 query/*
-data - Copy/
-data - Copy/*
 node_modules/
 node_modules/*
 libs/utils/logs/

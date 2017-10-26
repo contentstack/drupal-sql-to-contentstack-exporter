@@ -1,5 +1,4 @@
 {
-  "data": "./data",
   "entryfolder":"entries",
   "modules": {
     "locales": {
@@ -51,14 +50,15 @@
   },
   "base_locale":{"name": "English US", "code":"en-us"},
   "mysql":{
-    "host":"localhost",
-    "user":"root",
-    "password":"",
-    "database":"drupal-demo"
+    "host":"<<mysql host>>",
+    "user":"<<mysql username>>",
+    "password":"<<mysql password>>",
+    "database":"<<mysql database of drupal>>"
   },
-  "base_url":"http://localhost/drupal",
-  "public_path":"/sites/default/files/",
-  "private_path":"/sites/default/private/files/",
+  "data": "<<folder path for data to be exported>>",
+  "base_url":"<<base url>>",
+  "public_path":"<<public file path>>",
+  "private_path":"<<private file path>>",
   "mysql-query":{
     "locale":"SELECT languages.language,languages.name FROM `languages`",
     "taxonomy_term_data":"SELECT a.name, b.name AS title,b.description,b.tid,b.vid,c.parent FROM taxonomy_vocabulary a, taxonomy_term_data b,taxonomy_term_hierarchy c WHERE b.tid = c.tid AND a.vid=b.vid",
