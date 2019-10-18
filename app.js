@@ -8,6 +8,7 @@ global.warnLogger = require("./libs/utils/logger.js")("warn").log;
 
 
 var modulesList = ['query','contentTypes','vocabulary','assets','authors','taxonomy','page'];
+//var modulesList = ['contentTypes'];
 var _export = [];
 if(process.argv.length == 3 || process.argv.length == 4) {
     global.ids = undefined;

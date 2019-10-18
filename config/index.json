@@ -6,7 +6,7 @@
       "fileName": "locales.json"
     },
     "contentTypes": {
-      "dirName": "contenttypes",
+      "dirName": "content_types",
       "fileName": "contenttype.json",
       "masterfile":"contenttypes.json",
       "validKeys": ["title", "uid", "schema", "options","singleton","description"]
@@ -15,6 +15,11 @@
       "dirName": "authors",
       "fileName": "en-us.json",
       "masterfile":"authors.json"
+    },
+    "entries": {
+      "dirName": "entries",
+      "fileName": "en-us.json",
+      "masterfile":"entries.json"
     },
     "vocabulary":{
       "dirName": "vocabulary",
@@ -50,27 +55,27 @@
   },
   "base_locale":{"name": "English US", "code":"en-us"},
   "mysql":{
-    "host":"<<mysql host>>",
-    "user":"<<mysql username>>",
-    "password":"<<mysql password>>",
-    "database":"<<mysql database of drupal>>"
+    "host":"",
+    "user":"",
+    "password":"",
+    "database":""
   },
-  "data": "<<folder path for data to be exported>>",
-  "base_url":"<<base url>>",
-  "public_path":"<<public file path>>",
-  "private_path":"<<private file path>>",
+  "data": "",
+  "base_url":"",
+  "public_path":"",
+  "private_path":"",
   "mysql-query":{
     "locale":"SELECT languages.language,languages.name FROM `languages`",
-    "taxonomy_term_data":"SELECT a.name, b.name AS title,b.description,b.tid,b.vid,c.parent FROM taxonomy_vocabulary a, taxonomy_term_data b,taxonomy_term_hierarchy c WHERE b.tid = c.tid AND a.vid=b.vid",
-    "taxonomyCount":"SELECT count(b.tid) as taxonomycount FROM taxonomy_vocabulary a, taxonomy_term_data b,taxonomy_term_hierarchy c WHERE b.tid = c.tid AND a.vid=b.vid",
-    "ct_mapped":"SELECT b.field_name,b.bundle AS content_types,c.type FROM field_config_instance b, field_config c WHERE b.field_name = c.field_name",
+    "taxonomy_term_data":"SELECT a.name, a.description__value,b.tid,b.vid FROM taxonomy_term_field_data a, taxonomy_term_data b WHERE a.vid=b.vid",
+    "taxonomyCount":"SELECT count(b.tid) as taxonomycount FROM taxonomy_term_field_data a, taxonomy_term_data b WHERE a.tid = b.tid AND a.vid=b.vid",
+    "ct_mapped":"SELECT *, CONVERT(data USING utf8) as data FROM config WHERE name LIKE '%field.field.node%'",
     "fileID":"SELECT * FROM `file_usage`",
     "assetCount":"SELECT count(a.fid) as assetcount FROM file_managed a",
-    "assets": "SELECT a.fid, a.filename, a.uri,b.count FROM file_managed a, file_usage b GROUP BY(a.fid)",
+    "assets": "SELECT a.fid, a.filename, a.uri,b.count FROM file_managed a, file_usage b",
     "assetsFID": "SELECT a.fid, a.filename, a.uri, b.id,b.count FROM file_managed a, file_usage b WHERE a.fid IN",
-    "authorCount":"SELECT count(users.uid) as usercount FROM `users` LEFT JOIN file_managed ON file_managed.fid = users.picture",
-    "authors":"SELECT name,mail,timezone,picture FROM `users` LEFT JOIN file_managed ON file_managed.fid = users.picture",
-    "vocabulary":"SELECT taxonomy_vocabulary.vid, taxonomy_vocabulary.name AS title, taxonomy_vocabulary.description FROM taxonomy_vocabulary",
-    "vocabularyCount":"SELECT count(taxonomy_vocabulary.vid) as vocabularycount FROM taxonomy_vocabulary"
+    "authorCount":"SELECT count(users_field_data.uid) as usercount FROM users_field_data LEFT JOIN file_managed ON file_managed.fid = users_field_data.uid",
+    "authors":"SELECT name,mail,timezone FROM users_field_data LEFT JOIN file_managed ON file_managed.fid = users_field_data.uid",
+    "vocabulary":"SELECT taxonomy_term_field_data.vid, taxonomy_term_field_data.name AS title, taxonomy_term_field_data.description__value FROM taxonomy_term_field_data",
+    "vocabularyCount":"SELECT count(taxonomy_term_field_data.vid) as vocabularycount FROM taxonomy_term_field_data"
   }
 }
