@@ -1,12 +1,12 @@
 /**
- * Created by pradeep on 3/3/17.
+ * Updated by Rohit on 1/10/19.
  */
 var mkdirp    = require('mkdirp'),
     path      = require('path'),
     _ = require('lodash'),
     url = require('url'),
     fs = require('fs')
-when      = require('when'),
+    when      = require('when'),
     guard       = require('when/guard'),
     parallel    = require('when/parallel'),
     sequence        = require('when/sequence'),
@@ -20,6 +20,11 @@ var asyncLoop = require('node-async-loop');
 var helper = require('../../libs/utils/helper.js');
 // var querypageconfig = require('../query');
 var dir = './query';
+
+var entriesConfig = config.modules.entries,
+    entriesFolderPath = path.resolve(config.data,entriesConfig.dirName);
+    
+
 var querypageconfig = helper.readFile(path.join(dir,"index.json"));
 function ExtractPosts(){
     this.connection=helper.connect();
@@ -28,8 +33,8 @@ function ExtractPosts(){
 ExtractPosts.prototype = {
     putPosts: function(postsdetails, key){
         var self = this;
-        var folderpath = 'data/entries/'+key;
-        var masterFolderPath = 'data/master/entries';
+        var folderpath = entriesFolderPath+'/'+key;
+        masterFolderPath = path.resolve(config.data, 'master',config.entryfolder);
         if (!fs.existsSync(folderpath)) {
             mkdirp.sync(folderpath);
             helper.writeFile(path.join(folderpath,"en-us.json"))
@@ -40,9 +45,31 @@ ExtractPosts.prototype = {
         var mastercontenttype = helper.readFile(path.join(masterFolderPath,key+".json"));
 
         return when.promise(function(resolve, reject) {
-
             var field_name = Object.keys(postsdetails[0]);
+            var nid
+            var image_details = [];
             postsdetails.map(function (data, index) {
+                
+                if(data.field_image_target_id && data.field_image_target_id != undefined) {
+                    if(index == 0){
+                        // data['field_image_target_id'] = {"uid":data.field_image_target_id,"filename": "Image.jpg"} 
+                            image_details.push({"uid":data.field_image_target_id,"filename": "Image"+index+".jpg"})
+                            data['field_image_target_id'] = image_details
+                            nid = data.nid 
+                    } else if(data.nid == nid){
+                            image_details.push({"uid":data.field_image_target_id,"filename": "Image"+index+".jpg"})
+                            data['field_image_target_id'] = image_details
+                    } else {
+                          image_details = []
+                          image_details.push({"uid":data.field_image_target_id,"filename": "Image"+index+".jpg"})
+                          data['field_image_target_id'] = image_details
+                          nid = data.nid  
+                    }
+                  
+                }
+               
+                 //console.log("jndjdjdndjjdnjd", data)
+
                 var ct_value={};
                 var date;
                 for(var key in field_name){
@@ -80,10 +107,9 @@ ExtractPosts.prototype = {
         return when.promise(function(resolve, reject) {
             var query = querypageconfig["page"][""+pagename+""];
             query = query + " limit " + skip + ", "+limit;
-            // console.log(" query ------------- ",query)
             self.connection.query(query, function(error, rows, fields) {
                 if(!error){
-                    if(rows.length>0){
+                    if(rows.length>0){                                
                         self.putPosts(rows, pagename)
                             .then(function(results){
                                 resolve(results);
@@ -94,7 +120,6 @@ ExtractPosts.prototype = {
                     }
                     else {
                         errorLogger("no entries found");
-                        // self.connection.end();
                         resolve();
                     }
                 }else{
@@ -105,6 +130,8 @@ ExtractPosts.prototype = {
         })
     },
     getPageCount: function (pagename, countentry) {
+        //console.log("pagename======<>>>>>>>>", pagename)
+           //             console.log("countryentry======<>>>>>>>>", countentry)
         var self = this;
         return when.promise(function (resolve, reject) {
             var _getPage = [];
@@ -136,6 +163,7 @@ ExtractPosts.prototype = {
                 if (!error) {
                     var countentry = rows[0]["countentry"];
                     if (countentry > 0) {
+                        
                         self.getPageCount(pagename, countentry)
                             .then(function(){
                                 resolve()
