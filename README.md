@@ -102,7 +102,7 @@ You can find the logs of the export process under libs/utils/logs. The files inc
 ## Known issues
 
 1. The internal links will not be updated.
-2. Only supported for Drupal 7.
+2. Only supported for Drupal 8.
 
 
 ## License
