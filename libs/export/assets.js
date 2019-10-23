@@ -1,5 +1,5 @@
 /**
- * Created by pradeep on 16/2/17.
+ * Updated by Rohit on 1/10/19.
  */
 /**
  * External module Dependencies.
@@ -119,13 +119,15 @@ ExtractAssets.prototype = {
             if (assetids.length > 0) {
                 assetids = assetids.join()
                 var query = config["mysql-query"]["assetsFID"];
-                query = query + "(" + assetids + ") GROUP BY(a.fid)"
+                //query = query + "(" + assetids + ") GROUP BY a.fid"
+                query = query + "(" + assetids + ")"
                 self.connection.query(query, function (error, rows, fields) {
                     if (!error) {
                         if (rows.length > 0) {
-                            self.connection.end();
+                            //self.connection.end();
                             var _getAsset = [];
                             for (var i = 0, total = rows.length; i < total; i++) {
+                                // console.log("row[]", rows[i])
                                 _getAsset.push(function (data) {
                                     return function () {
                                         return self.saveAsset(data);
