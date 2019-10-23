@@ -8,3 +8,4 @@ node_modules/
 node_modules/*
 libs/utils/logs/
 libs/utils/logs/*
+drupal_testing.sql

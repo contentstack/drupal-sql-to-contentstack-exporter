@@ -1,11 +1,12 @@
 /**
- * Created by pradeep on 22/2/17.
+ * Updated by Rohit on 1/10/19.
  */
 var mkdirp    = require('mkdirp'),
     path      = require('path'),
     _      = require('lodash'),
     fs = require('fs'),
     when      = require('when');
+    phpUnserialize = require('phpunserialize');
 
 /**
  * Internal module Dependencies.
@@ -36,6 +37,7 @@ function ExtractContentTypes(){
     this.cycle   = [];
     this.connection=helper.connect();
 }
+
 ExtractContentTypes.prototype = {
     start :function() {
         var self = this;
@@ -63,25 +65,30 @@ ExtractContentTypes.prototype = {
     },
     getcontenttypes: function(){
         var self = this;
-        return when.promise(function(resolve, reject){
-            self.connection.connect()
-            var query=config["mysql-query"]["ct_mapped"];
+        var details_data = [];
+        return when.promise(function(resolve, reject) {
+                var query=config["mysql-query"]["ct_mapped"];
             self.connection.query(query, function(error, rows, fields) {
-                if(!error){
-                    if(rows.length>0){
-                        // console.log(" rows ------------- ",rows)
-                        self.putContentTypes(rows)
-                        self.connection.end();
-                        resolve();
+
+                for(var i=0; i<rows.length; i++) {
+                   var conv_details = phpUnserialize(rows[i].data)
+                    details_data.push({field_name:conv_details.field_name, content_types:conv_details.bundle, type:conv_details.field_type})
+                }
+
+                    if(!error){
+                        if(details_data.length>0){
+                            self.putContentTypes(details_data)
+                            self.connection.end();
+                            resolve();
+                        }else{
+                            self.connection.end();
+                            resolve();
+                        }
                     }else{
                         self.connection.end();
-                        resolve();
+                        reject(error);
                     }
-                }else{
-                    self.connection.end();
-                    reject(error);
-                }
-            })
+                })            
         })
     },
     putContentTypes: function(contentdetails){
@@ -99,8 +106,9 @@ ExtractContentTypes.prototype = {
                 var schema = [];
                 var contenttypeTitle;
                 allkey.map(function (data1, index) {
-                    allfield.push({field_name:data1["field_name"],type:data1["type"]})
+                  //  allfield.push({field_name:data1["field_name"],type:data1["type"]})
 
+                  allfield.push({type:data1["type"]}) 
                     //Replace content type and field name
                     var fieldTitle;
                     var fd_name = data1["field_name"];
@@ -112,6 +120,7 @@ ExtractContentTypes.prototype = {
                     }else {
                         fieldTitle = data1["field_name"];
                     }
+                   // console.log("dataa111======>>>", data1["type"])
                     // Pushed content type name and field in schema
                     switch (data1["type"]){
                         case "text_with_summary" :{
@@ -149,12 +158,12 @@ ExtractContentTypes.prototype = {
                             schema.push({
                                 "data_type": "file",
                                 "display_name": fieldTitle,
-                                "uid": data1["field_name"]+'_fid',
+                                "uid": data1["field_name"]+'_target_id',
                                 "field_metadata": {
                                     "description": "",
                                     "rich_text_type": "standard"
                                 },
-                                "multiple": false,
+                                "multiple": true,
                                 "mandatory": false,
                                 "unique": false
                             })
@@ -179,7 +188,7 @@ ExtractContentTypes.prototype = {
                             schema.push({
                                 "data_type": "file",
                                 "display_name": fieldTitle,
-                                "uid": data1["field_name"]+'_fid',
+                                "uid": data1["field_name"]+'_target_id',
                                 "field_metadata": {
                                     "description": "",
                                     "rich_text_type": "standard"
@@ -209,6 +218,34 @@ ExtractContentTypes.prototype = {
                         case "list_boolean" :{
                             schema.push({
                                 "data_type": "boolean",
+                                "display_name": fieldTitle,
+                                "uid": data1["field_name"],
+                                "field_metadata": {
+                                    "description": "",
+                                    "default_value": ""
+                                },
+                                "multiple": false,
+                                "mandatory": false,
+                                "unique": false
+                            })
+                        }break;
+                        case "datetime" :{
+                            schema.push({
+                                "data_type": "isodate",
+                                "display_name": fieldTitle,
+                                "uid": data1["field_name"],
+                                "field_metadata": {
+                                    "description": "",
+                                    "default_value": ""
+                                },
+                                "multiple": false,
+                                "mandatory": false,
+                                "unique": false
+                            })
+                        }break;
+                        case "integer" :{
+                            schema.push({
+                                "data_type": "number",
                                 "display_name": fieldTitle,
                                 "uid": data1["field_name"],
                                 "field_metadata": {

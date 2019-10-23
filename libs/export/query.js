@@ -1,11 +1,12 @@
 /**
- * Created by pradeep on 27/2/17.
+ * Updated by Rohit on 1/10/19.
  */
 var mkdirp    = require('mkdirp'),
     path      = require('path'),
     _      = require('lodash'),
     fs = require('fs'),
     when      = require('when');
+    phpUnserialize = require('phpunserialize');
 
 var helper = require('../../libs/utils/helper.js');
 function Extractfield() {
@@ -16,26 +17,38 @@ Extractfield.prototype = {
         var self = this;
         return when.promise(function(resolve, reject){
             var value = data1["field_name"]
-            var query= "SELECT * FROM"+" "+"field_data_"+value;
+            var query= "SELECT * FROM"+" "+"node__"+value;
             var field_value ;
             self.connection.query(query, function(error, rows, fields) {
+                
                 if(!error){
                         // if(rows.length>0){
-                            var fd_table=[];
+                            var fd_table=[];                       
                             for(var field in fields) {
+
                                 if(fields[field].name == value+"_value"){
-                                    fd_table = "field_data_"+data1["field_name"]+"."+fields[field].name;
+                                    fd_table = "node__"+data1["field_name"]+"."+fields[field].name;
                                     //resolve(fd_table);
                                 }
                                 if(fields[field].name == value+"_fid"){
-                                     fd_table = "field_data_"+data1["field_name"]+"."+fields[field].name;
+                                     fd_table = "node__"+data1["field_name"]+"."+fields[field].name;
                                     //resolve(fd_table);
                                 }
                                 if(fields[field].name == value+"_tid"){
-                                     fd_table = "field_data_"+data1["field_name"]+"."+fields[field].name;
+                                     fd_table = "node__"+data1["field_name"]+"."+fields[field].name;
                                    // resolve(fd_table);
                                 }
+                                if(fields[field].name == value+"_status"){
+                                    fd_table = "node__"+data1["field_name"]+"."+fields[field].name;
+                                  // resolve(fd_table);
+                               }
+                
+                                if(fields[field].name == value+"_target_id"){
+                                    fd_table = "node__"+data1["field_name"]+"."+fields[field].name;
+                                // resolve(fd_table);
                             }
+                            }
+                            
                             resolve(fd_table);
 
                 }else{
@@ -63,7 +76,7 @@ Extractfield.prototype = {
                 var last=[];
                 var queries =[];
                 allkey.map(function (data1, index) {
-                    last.push("field_data_"+data1["field_name"])
+                    last.push("node__"+data1["field_name"])
                      queries.push(
                          self.getQuery(data1)
                      )
@@ -80,11 +93,12 @@ Extractfield.prototype = {
                         left=where[i]+left;
                     }
                     last.unshift("node")
-                    result.unshift("SELECT node.nid,node.title,node.language,node.tnid,users.name AS uid_name,node.created")
+                    result.unshift("SELECT node.nid,node.title,node.langcode,node.created")
                     var resultdetail = result.join(",")
+
                     var type = "'"+data+"'";
-                    var querydata = resultdetail.concat(" FROM  node "+left+" WHERE node.type = "+type + " GROUP BY node.nid")
-                    countPage = ("SELECT count(node.nid) as countentry FROM  node "+left+" WHERE node.type = "+type)
+                    var querydata = resultdetail.concat(" FROM  node_field_data node "+left+" WHERE node.type = "+type)
+                    countPage = ("SELECT count(node.nid) as countentry FROM  node_field_data node "+left+" WHERE node.type = "+type)
                     // console.log(" countpage -------------------------- ",countPage)
                     select[data] = querydata.toString();
                     countQuery[data+"Count"] = countPage.toString();
@@ -103,13 +117,20 @@ Extractfield.prototype = {
     },
     start : function () {
         var self = this;
+        var details_data = [];
         return when.promise(function(resolve, reject){
             self.connection.connect()
             var query=config["mysql-query"]["ct_mapped"];
             self.connection.query(query, function(error, rows, fields) {
+
+                
+                for(var i=0; i<rows.length; i++) {
+                    var conv_details = phpUnserialize(rows[i].data)
+                     details_data.push({field_name:conv_details.field_name, content_types:conv_details.bundle, type:conv_details.field_type})
+                 }
                 if(!error){
-                    if(rows.length>0){
-                        self.putfield(rows)
+                    if(details_data.length>0){
+                        self.putfield(details_data)
                         self.connection.end();
                         resolve();
                     }else{
