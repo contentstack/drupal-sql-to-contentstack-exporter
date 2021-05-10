@@ -4,7 +4,7 @@
   "dependencies": {
     "async": "^2.1.5",
     "fs": "0.0.1-security",
-    "lodash": "^4.17.2",
+    "lodash": "^4.17.21",
     "mariadb": "^2.1.1",
     "mkdirp": "^0.5.1",
     "mysql": "^2.12.0",
